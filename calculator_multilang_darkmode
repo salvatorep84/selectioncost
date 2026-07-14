@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="pageTitle"></title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --bg-start: #eef4ff;
+      --bg-end: #ffffff;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #5f6b7a;
+      --primary: #0A66C2;
+      --primary-dark: #084f97;
+      --border: #d8dee8;
+      --error: #b42318;
+      --error-bg: #fff1f0;
+      --success-bg: #eef6ff;
+      --surface: #fbfdff;
+      --input-bg: #ffffff;
+      --secondary-bg: #ffffff;
+      --secondary-hover: #f8fafc;
+      --row-border: #e8edf5;
+      --formula-text: #263247;
+      --note-text: #12335b;
+      --note-border: #c7ddff;
+      --card-border: rgba(216, 222, 232, 0.8);
+      --shadow: 0 18px 45px rgba(16, 24, 40, 0.10);
+      --radius: 18px;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0f1722;
+      --bg-start: #0b1220;
+      --bg-end: #111827;
+      --card: #172131;
+      --text: #f2f5f9;
+      --muted: #aeb8c7;
+      --primary-dark: #2b7fd3;
+      --border: #344258;
+      --error: #ffb4ab;
+      --error-bg: #351a1d;
+      --success-bg: #142b42;
+      --surface: #121c2a;
+      --input-bg: #0f1825;
+      --secondary-bg: #1b2636;
+      --secondary-hover: #243246;
+      --row-border: #2b384a;
+      --formula-text: #e5ebf3;
+      --note-text: #d8eaff;
+      --note-border: #28547d;
+      --card-border: rgba(52, 66, 88, 0.9);
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg) 38%, var(--bg-end) 100%);
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    .page-controls {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .language-selector {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--secondary-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+
+    .language-button,
+    .theme-toggle {
+      min-height: 38px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .language-button[aria-pressed="true"] {
+      color: #ffffff;
+      background: var(--primary);
+    }
+
+    .theme-toggle {
+      min-width: 42px;
+      background: var(--secondary-bg);
+      border-color: var(--border);
+      font-size: 1rem;
+    }
+
+    .language-button:focus-visible,
+    .theme-toggle:focus-visible,
+    button:focus-visible {
+      outline: 3px solid rgba(10, 102, 194, 0.35);
+      outline-offset: 2px;
+    }
+
+    .hero { text-align: center; margin-bottom: 28px; }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .intro {
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .tool-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 28px;
+      padding: 28px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    form { display: grid; gap: 24px; }
+
+    fieldset {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend, .results-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .section-number {
+      display: inline-grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 999px;
+      color: #ffffff;
+      background: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field { display: grid; gap: 7px; }
+
+    label {
+      color: var(--formula-text);
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .input-wrapper { position: relative; }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 44px 12px 14px;
+      color: var(--text);
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.14);
+    }
+
+    input[aria-invalid="true"] {
+      border-color: var(--error);
+      background: var(--error-bg);
+    }
+
+    .suffix {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .error-message {
+      min-height: 18px;
+      color: var(--error);
+      font-size: 0.84rem;
+      font-weight: 650;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 11px 18px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-primary { color: #ffffff; background: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { color: var(--text); background: var(--input-bg); border-color: var(--border); }
+    .btn-secondary:hover { background: var(--secondary-hover); }
+
+    .results-panel {
+      align-self: start;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .total-card {
+      margin-bottom: 18px;
+      padding: 22px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #0A66C2 0%, #073b70 100%);
+      border-radius: 16px;
+    }
+
+    .total-label { margin: 0 0 8px; font-weight: 700; opacity: 0.9; }
+
+    .total-value {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    .daily-note {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      color: var(--note-text);
+      background: var(--success-bg);
+      border: 1px solid var(--note-border);
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--row-border);
+    }
+
+    .result-row dt { color: var(--muted); font-weight: 500; }
+    .result-row dd { margin: 0; text-align: right; font-weight: 500; }
+    .result-row.is-emphasis dt,
+    .result-row.is-emphasis dd { font-weight: 850; }
+
+    .formula-box {
+      margin-top: 18px;
+      padding: 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .formula-box h3 { margin: 0 0 10px; font-size: 1rem; }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      color: var(--formula-text);
+      font: 700 0.98rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .invalid-state {
+      color: var(--error);
+      font-weight: 750;
+    }
+
+    @media (max-width: 880px) {
+      .tool-card { grid-template-columns: 1fr; padding: 22px; }
+      .results-panel { position: static; }
+    }
+
+    @media (max-width: 620px) {
+      main { width: min(100% - 20px, 1120px); padding: 24px 0; }
+      .tool-card { padding: 18px; gap: 22px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .page-controls { justify-content: center; flex-wrap: wrap; }
+      .actions { flex-direction: column; }
+      button { width: 100%; }
+      .result-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .result-row dd { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="page-controls">
+      <div class="language-selector" role="group" data-i18n-aria-label="languageSelector">
+        <button class="language-button" type="button" data-language="it" aria-label="Italiano" aria-pressed="true">IT</button>
+        <button class="language-button" type="button" data-language="en" aria-label="English" aria-pressed="false">EN</button>
+        <button class="language-button" type="button" data-language="es" aria-label="Español" aria-pressed="false">ES</button>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" type="button" data-i18n-aria-label="enableDarkMode">🌙</button>
+    </div>
+
+    <header class="hero">
+      <p class="eyebrow" data-i18n="eyebrow"></p>
+      <h1 data-i18n="heading"></h1>
+      <p class="intro" data-i18n="intro"></p>
+    </header>
+
+    <section class="tool-card" data-i18n-aria-label="calculatorAriaLabel" aria-label="Tool di calcolo del costo di sostituzione di un dipendente">
+      <form id="roi-form" novalidate>
+        <fieldset>
+          <legend><span class="section-number">1</span><span data-i18n="employeeData"></span></legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="ral" data-i18n="currentSalary"></label>
+              <div class="input-wrapper">
+                <input id="ral" name="ral" type="number" min="0" step="100" value="35000" required inputmode="decimal" aria-describedby="ral-error">
+                <span class="suffix" data-i18n="euroSuffix"></span>
+              </div>
+              <span id="ral-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="produttivitaAnnua" data-i18n="annualProductivity"></label>
+              <div class="input-wrapper">
+                <input id="produttivitaAnnua" name="produttivitaAnnua" type="number" min="0" step="100" value="33000" inputmode="decimal" aria-describedby="produttivitaAnnua-error">
+                <span class="suffix" data-i18n="euroSuffix"></span>
+              </div>
+              <span id="produttivitaAnnua-error" class="error-message" aria-live="polite"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="section-number">2</span><span data-i18n="recruitmentCostsAndTiming"></span></legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="percentualeFee" data-i18n="recruitmentFee"></label>
+              <div class="input-wrapper">
+                <input id="percentualeFee" name="percentualeFee" type="number" min="0" max="100" step="0.1" value="15" inputmode="decimal" aria-describedby="percentualeFee-error">
+                <span class="suffix">%</span>
+              </div>
+              <span id="percentualeFee-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="percentualePremio" data-i18n="changePremium"></label>
+              <div class="input-wrapper">
+                <input id="percentualePremio" name="percentualePremio" type="number" min="0" max="100" step="0.1" value="20" inputmode="decimal" aria-describedby="percentualePremio-error">
+                <span class="suffix">%</span>
+              </div>
+              <span id="percentualePremio-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="giorniTimeToHire" data-i18n="timeToHire"></label>
+              <div class="input-wrapper">
+                <input id="giorniTimeToHire" name="giorniTimeToHire" type="number" min="0" step="1" value="45" inputmode="numeric" aria-describedby="giorniTimeToHire-error">
+                <span class="suffix" data-i18n="daysSuffix"></span>
+              </div>
+              <span id="giorniTimeToHire-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="giorniLavorativiAnnui" data-i18n="annualWorkingDays"></label>
+              <div class="input-wrapper">
+                <input id="giorniLavorativiAnnui" name="giorniLavorativiAnnui" type="number" min="1" step="1" value="250" inputmode="numeric" aria-describedby="giorniLavorativiAnnui-error">
+                <span class="suffix" data-i18n="daysSuffix"></span>
+              </div>
+              <span id="giorniLavorativiAnnui-error" class="error-message" aria-live="polite"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button class="btn-secondary" type="button" id="reset-button" data-i18n="resetButton"></button>
+        </div>
+      </form>
+
+      <aside class="results-panel" aria-live="polite">
+        <h2 class="results-title"><span class="section-number">3</span><span data-i18n="economicResult"></span></h2>
+        <div class="total-card">
+          <p class="total-label" data-i18n="totalReplacementCost"></p>
+          <p class="total-value" id="costoTotale">€ 0</p>
+        </div>
+
+        <p class="daily-note" id="daily-note"></p>
+
+        <dl class="result-list">
+          <div class="result-row"><dt data-i18n="dailyProductivity"></dt><dd id="produttivitaGiornaliera">€ 0</dd></div>
+          <div class="result-row is-emphasis"><dt data-i18n="timeToHireCost"></dt><dd id="costoTimeToHire">€ 0</dd></div>
+          <div class="result-row is-emphasis"><dt data-i18n="changePremium"></dt><dd id="premioCambio">€ 0</dd></div>
+          <div class="result-row"><dt data-i18n="estimatedNewSalary"></dt><dd id="nuovaRalStimata">€ 0</dd></div>
+          <div class="result-row is-emphasis"><dt data-i18n="recruitmentFee"></dt><dd id="feeSelezione">€ 0</dd></div>
+        </dl>
+
+        <div class="formula-box">
+          <h3 data-i18n="calculationSummary"></h3>
+          <pre id="formula-summary"></pre>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const storageKeys = {
+      language: 'replacementCalculatorLanguage',
+      theme: 'replacementCalculatorTheme'
+    };
+
+    const languageSettings = {
+      it: { htmlLang: 'it', locale: 'it-IT' },
+      en: { htmlLang: 'en', locale: 'en-IE' },
+      es: { htmlLang: 'es', locale: 'es-ES' }
+    };
+
+    const translations = {
+      it: {
+        pageTitle: 'Calcolatore costo sostituzione dipendente',
+        eyebrow: 'HR • Finance • Talent Acquisition',
+        heading: 'Calcolatore costo sostituzione dipendente',
+        intro: 'Stima in tempo reale l’impatto economico complessivo della sostituzione di una risorsa, includendo fee di selezione, time-to-hire e premio al cambio.',
+        calculatorAriaLabel: 'Tool di calcolo del costo di sostituzione di un dipendente',
+        employeeData: 'Dati del dipendente',
+        currentSalary: 'RAL attuale del dipendente',
+        annualProductivity: 'Produttività annua',
+        recruitmentCostsAndTiming: 'Costi e tempi di selezione',
+        recruitmentFee: 'Fee di selezione',
+        changePremium: 'Premio al cambio',
+        timeToHire: 'Time-to-hire',
+        annualWorkingDays: 'Giorni lavorativi annui',
+        resetButton: 'Ripristina valori',
+        economicResult: 'Risultato economico',
+        totalReplacementCost: 'Costo totale della sostituzione',
+        dailyVacancyCost: 'Ogni giorno aggiuntivo con la posizione scoperta costa circa {value}.',
+        invalidDailyCost: 'Correggi i valori evidenziati per aggiornare il costo giornaliero.',
+        estimatedNewSalary: 'Nuova RAL stimata',
+        dailyProductivity: 'Produttività giornaliera',
+        timeToHireCost: 'Costo del time-to-hire',
+        calculationSummary: 'Riepilogo del calcolo',
+        invalidSummary: 'Inserisci valori validi per visualizzare il calcolo.',
+        feeSummary: '{value} di fee',
+        timeToHireSummary: '{value} di costo del time-to-hire',
+        changePremiumSummary: '{value} di premio al cambio',
+        totalSummary: '{value} di costo totale',
+        salaryRequired: 'La RAL è obbligatoria.',
+        valueRequired: 'Inserisci un valore.',
+        invalidNumber: 'Inserisci un numero valido.',
+        negativeValue: 'Il valore non può essere negativo.',
+        percentageAbove100: 'La percentuale non può superare il 100%.',
+        integerDays: 'Inserisci un numero intero di giorni.',
+        workingDaysAboveZero: 'I giorni lavorativi devono essere maggiori di zero.',
+        languageSelector: 'Seleziona lingua',
+        themeToggle: 'Cambia tema',
+        enableDarkMode: 'Attiva modalità scura',
+        enableLightMode: 'Attiva modalità chiara',
+        euroSuffix: '€',
+        daysSuffix: 'gg'
+      },
+      en: {
+        pageTitle: 'Employee Replacement Cost Calculator',
+        eyebrow: 'HR • Finance • Talent Acquisition',
+        heading: 'Employee Replacement Cost Calculator',
+        intro: 'Estimate the total financial cost of replacing an employee, including recruitment fees, time-to-hire costs and the salary premium required to attract a replacement.',
+        calculatorAriaLabel: 'Employee replacement cost calculator',
+        employeeData: 'Employee details',
+        currentSalary: 'Current gross annual salary',
+        annualProductivity: 'Annual productivity',
+        recruitmentCostsAndTiming: 'Recruitment costs and timing',
+        recruitmentFee: 'Recruitment fee',
+        changePremium: 'Salary premium for changing jobs',
+        timeToHire: 'Time to hire',
+        annualWorkingDays: 'Annual working days',
+        resetButton: 'Reset values',
+        economicResult: 'Financial result',
+        totalReplacementCost: 'Total replacement cost',
+        dailyVacancyCost: 'Each additional day the position remains vacant costs approximately {value}.',
+        invalidDailyCost: 'Correct the highlighted values to update the daily vacancy cost.',
+        estimatedNewSalary: 'Estimated new annual salary',
+        dailyProductivity: 'Daily productivity',
+        timeToHireCost: 'Time-to-hire cost',
+        calculationSummary: 'Calculation summary',
+        invalidSummary: 'Enter valid values to view the calculation.',
+        feeSummary: '{value} recruitment fee',
+        timeToHireSummary: '{value} time-to-hire cost',
+        changePremiumSummary: '{value} salary premium',
+        totalSummary: '{value} total cost',
+        salaryRequired: 'Gross annual salary is required.',
+        valueRequired: 'Enter a value.',
+        invalidNumber: 'Enter a valid number.',
+        negativeValue: 'The value cannot be negative.',
+        percentageAbove100: 'The percentage cannot exceed 100%.',
+        integerDays: 'Enter a whole number of days.',
+        workingDaysAboveZero: 'Annual working days must be greater than zero.',
+        languageSelector: 'Select language',
+        themeToggle: 'Change theme',
+        enableDarkMode: 'Enable dark mode',
+        enableLightMode: 'Enable light mode',
+        euroSuffix: '€',
+        daysSuffix: 'days'
+      },
+      es: {
+        pageTitle: 'Calculadora del coste de sustitución de empleados',
+        eyebrow: 'RR. HH. • Finanzas • Adquisición de talento',
+        heading: 'Calculadora del coste de sustitución de empleados',
+        intro: 'Calcula el coste económico total de sustituir a un empleado, incluyendo los honorarios de selección, el coste del tiempo de contratación y el incremento salarial necesario para atraer a un sustituto.',
+        calculatorAriaLabel: 'Calculadora del coste de sustitución de un empleado',
+        employeeData: 'Datos del empleado',
+        currentSalary: 'Salario bruto anual actual',
+        annualProductivity: 'Productividad anual',
+        recruitmentCostsAndTiming: 'Costes y plazos de selección',
+        recruitmentFee: 'Honorarios de selección',
+        changePremium: 'Incremento salarial por cambio de empleo',
+        timeToHire: 'Tiempo de contratación',
+        annualWorkingDays: 'Días laborables anuales',
+        resetButton: 'Restablecer valores',
+        economicResult: 'Resultado económico',
+        totalReplacementCost: 'Coste total de sustitución',
+        dailyVacancyCost: 'Cada día adicional que el puesto permanece vacante cuesta aproximadamente {value}.',
+        invalidDailyCost: 'Corrige los valores indicados para actualizar el coste diario de la vacante.',
+        estimatedNewSalary: 'Nuevo salario anual estimado',
+        dailyProductivity: 'Productividad diaria',
+        timeToHireCost: 'Coste del tiempo de contratación',
+        calculationSummary: 'Resumen del cálculo',
+        invalidSummary: 'Introduce valores válidos para visualizar el cálculo.',
+        feeSummary: '{value} de honorarios de selección',
+        timeToHireSummary: '{value} de coste del tiempo de contratación',
+        changePremiumSummary: '{value} de incremento salarial',
+        totalSummary: '{value} de coste total',
+        salaryRequired: 'El salario bruto anual es obligatorio.',
+        valueRequired: 'Introduce un valor.',
+        invalidNumber: 'Introduce un número válido.',
+        negativeValue: 'El valor no puede ser negativo.',
+        percentageAbove100: 'El porcentaje no puede superar el 100%.',
+        integerDays: 'Introduce un número entero de días.',
+        workingDaysAboveZero: 'Los días laborables anuales deben ser superiores a cero.',
+        languageSelector: 'Seleccionar idioma',
+        themeToggle: 'Cambiar tema',
+        enableDarkMode: 'Activar modo oscuro',
+        enableLightMode: 'Activar modo claro',
+        euroSuffix: '€',
+        daysSuffix: 'días'
+      }
+    };
+
+    const defaults = {
+      ral: 35000,
+      percentualeFee: 15,
+      percentualePremio: 20,
+      produttivitaAnnua: 33000,
+      giorniTimeToHire: 45,
+      giorniLavorativiAnnui: 250
+    };
+
+    let currentLanguage = getStoredValue(storageKeys.language, 'it');
+    if (!translations[currentLanguage]) currentLanguage = 'it';
+    let currentTheme = getInitialTheme();
+    let currencyFormatter = getCurrencyFormatter();
+
+    const form = document.getElementById('roi-form');
+    const resetButton = document.getElementById('reset-button');
+    const themeToggle = document.getElementById('theme-toggle');
+    const languageButtons = document.querySelectorAll('.language-button');
+    const inputIds = Object.keys(defaults);
+    const inputs = Object.fromEntries(inputIds.map((id) => [id, document.getElementById(id)]));
+
+    const resultElements = {
+      feeSelezione: document.getElementById('feeSelezione'),
+      premioCambio: document.getElementById('premioCambio'),
+      nuovaRalStimata: document.getElementById('nuovaRalStimata'),
+      produttivitaGiornaliera: document.getElementById('produttivitaGiornaliera'),
+      costoTimeToHire: document.getElementById('costoTimeToHire'),
+      costoTotale: document.getElementById('costoTotale'),
+      dailyNote: document.getElementById('daily-note'),
+      formulaSummary: document.getElementById('formula-summary')
+    };
+
+    function getStoredValue(key, fallback) {
+      try { return localStorage.getItem(key) || fallback; } catch { return fallback; }
+    }
+
+    function setStoredValue(key, value) {
+      try { localStorage.setItem(key, value); } catch { /* localStorage unavailable */ }
+    }
+
+    function translate(key, variables = {}) {
+      let text = translations[currentLanguage][key] || translations.it[key] || '';
+      Object.entries(variables).forEach(([name, value]) => {
+        text = text.replaceAll(`{${name}}`, value);
+      });
+      return text;
+    }
+
+    // Aggiorna testi statici, attributi accessibili e locale attivo.
+    function applyLanguage(language) {
+      currentLanguage = translations[language] ? language : 'it';
+      document.documentElement.lang = languageSettings[currentLanguage].htmlLang;
+      document.querySelectorAll('[data-i18n]').forEach((element) => {
+        element.textContent = translate(element.dataset.i18n);
+      });
+      document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
+        element.setAttribute('aria-label', translate(element.dataset.i18nAriaLabel));
+      });
+      document.querySelectorAll('[data-i18n-title]').forEach((element) => {
+        element.setAttribute('title', translate(element.dataset.i18nTitle));
+      });
+      languageButtons.forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.language === currentLanguage));
+      });
+      document.title = translate('pageTitle');
+      currencyFormatter = getCurrencyFormatter();
+      updateThemeButton();
+      setStoredValue(storageKeys.language, currentLanguage);
+      updateInterface();
+    }
+
+    function getCurrencyFormatter() {
+      return new Intl.NumberFormat(languageSettings[currentLanguage].locale, {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0
+      });
+    }
+
+    function formatCurrency(value) {
+      return Number.isFinite(value) ? currencyFormatter.format(value) : currencyFormatter.format(0);
+    }
+
+    function getInitialTheme() {
+      const storedTheme = getStoredValue(storageKeys.theme, '');
+      if (storedTheme === 'dark' || storedTheme === 'light') return storedTheme;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    // Applica tema e aggiorna attributi accessibili del controllo.
+    function applyTheme(theme) {
+      currentTheme = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = currentTheme;
+      updateThemeButton();
+      setStoredValue(storageKeys.theme, currentTheme);
+    }
+
+    function updateThemeButton() {
+      const nextModeKey = currentTheme === 'dark' ? 'enableLightMode' : 'enableDarkMode';
+      themeToggle.textContent = currentTheme === 'dark' ? '☀' : '🌙';
+      themeToggle.setAttribute('aria-label', translate(nextModeKey));
+      themeToggle.setAttribute('title', translate(nextModeKey));
+    }
+
+    function setFieldError(id, message) {
+      const errorElement = document.getElementById(`${id}-error`);
+      inputs[id].setAttribute('aria-invalid', message ? 'true' : 'false');
+      errorElement.textContent = message;
+    }
+
+    // Legge e valida tutti gli input del form.
+    function readAndValidateInputs() {
+      const values = {};
+      const errors = {};
+
+      inputIds.forEach((id) => {
+        const rawValue = inputs[id].value.trim();
+        const value = Number(rawValue);
+        values[id] = value;
+
+        if (rawValue === '') {
+          errors[id] = id === 'ral' ? translate('salaryRequired') : translate('valueRequired');
+          return;
+        }
+
+        if (!Number.isFinite(value)) {
+          errors[id] = translate('invalidNumber');
+          return;
+        }
+
+        if (value < 0) {
+          errors[id] = translate('negativeValue');
+        }
+      });
+
+      ['percentualeFee', 'percentualePremio'].forEach((id) => {
+        if (!errors[id] && values[id] > 100) {
+          errors[id] = translate('percentageAbove100');
+        }
+      });
+
+      ['giorniTimeToHire', 'giorniLavorativiAnnui'].forEach((id) => {
+        if (!errors[id] && !Number.isInteger(values[id])) {
+          errors[id] = translate('integerDays');
+        }
+      });
+
+      if (!errors.giorniLavorativiAnnui && values.giorniLavorativiAnnui <= 0) {
+        errors.giorniLavorativiAnnui = translate('workingDaysAboveZero');
+      }
+
+      inputIds.forEach((id) => setFieldError(id, errors[id] || ''));
+
+      return { values, isValid: Object.keys(errors).length === 0 };
+    }
+
+    // Esegue il calcolo economico principale.
+    function calculateCosts(values) {
+      const premioCambio = values.ral * (values.percentualePremio / 100);
+      const feeSelezione = (values.ral + premioCambio) * (values.percentualeFee / 100);
+      const produttivitaGiornaliera = values.produttivitaAnnua / values.giorniLavorativiAnnui;
+      const costoTimeToHire = produttivitaGiornaliera * values.giorniTimeToHire;
+      const costoTotale = feeSelezione + premioCambio + costoTimeToHire;
+      const nuovaRalStimata = values.ral + premioCambio;
+      return { feeSelezione, premioCambio, produttivitaGiornaliera, costoTimeToHire, costoTotale, nuovaRalStimata };
+    }
+
+    function clearResults() {
+      resultElements.costoTotale.textContent = formatCurrency(0);
+      resultElements.dailyNote.textContent = translate('invalidDailyCost');
+      resultElements.dailyNote.classList.add('invalid-state');
+      ['feeSelezione', 'premioCambio', 'nuovaRalStimata', 'produttivitaGiornaliera', 'costoTimeToHire'].forEach((id) => {
+        resultElements[id].textContent = formatCurrency(0);
+      });
+      resultElements.formulaSummary.textContent = translate('invalidSummary');
+    }
+
+    // Aggiorna l'interfaccia con i risultati calcolati.
+    function updateInterface() {
+      const { values, isValid } = readAndValidateInputs();
+      if (!isValid) {
+        clearResults();
+        return;
+      }
+      const results = calculateCosts(values);
+      resultElements.dailyNote.classList.remove('invalid-state');
+      resultElements.feeSelezione.textContent = formatCurrency(results.feeSelezione);
+      resultElements.premioCambio.textContent = formatCurrency(results.premioCambio);
+      resultElements.nuovaRalStimata.textContent = formatCurrency(results.nuovaRalStimata);
+      resultElements.produttivitaGiornaliera.textContent = formatCurrency(results.produttivitaGiornaliera);
+      resultElements.costoTimeToHire.textContent = formatCurrency(results.costoTimeToHire);
+      resultElements.costoTotale.textContent = formatCurrency(results.costoTotale);
+      resultElements.dailyNote.textContent = translate('dailyVacancyCost', { value: formatCurrency(results.produttivitaGiornaliera) });
+      resultElements.formulaSummary.textContent = `${translate('feeSummary', { value: formatCurrency(results.feeSelezione) })}\n+ ${translate('timeToHireSummary', { value: formatCurrency(results.costoTimeToHire) })}\n+ ${translate('changePremiumSummary', { value: formatCurrency(results.premioCambio) })}\n= ${translate('totalSummary', { value: formatCurrency(results.costoTotale) })}`;
+    }
+
+    // Ripristina i valori predefiniti del tool.
+    function resetValues() {
+      inputIds.forEach((id) => { inputs[id].value = defaults[id]; });
+      updateInterface();
+    }
+
+    languageButtons.forEach((button) => {
+      button.addEventListener('click', () => applyLanguage(button.dataset.language));
+    });
+    themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+    form.addEventListener('input', updateInterface);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      updateInterface();
+    });
+    resetButton.addEventListener('click', resetValues);
+
+    applyTheme(currentTheme);
+    applyLanguage(currentLanguage);
+  </script>
+</body>
+</html>
