@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calcolatore costo sostituzione dipendente</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #5f6b7a;
+      --primary: #0A66C2;
+      --primary-dark: #084f97;
+      --border: #d8dee8;
+      --error: #b42318;
+      --error-bg: #fff1f0;
+      --success-bg: #eef6ff;
+      --shadow: 0 18px 45px rgba(16, 24, 40, 0.10);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 38%, #ffffff 100%);
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    .hero { text-align: center; margin-bottom: 28px; }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .intro {
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .tool-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 28px;
+      padding: 28px;
+      background: var(--card);
+      border: 1px solid rgba(216, 222, 232, 0.8);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    form { display: grid; gap: 24px; }
+
+    fieldset {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend, .results-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .section-number {
+      display: inline-grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 999px;
+      color: #ffffff;
+      background: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field { display: grid; gap: 7px; }
+
+    label {
+      color: #263247;
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .input-wrapper { position: relative; }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 44px 12px 14px;
+      color: var(--text);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.14);
+    }
+
+    input[aria-invalid="true"] {
+      border-color: var(--error);
+      background: var(--error-bg);
+    }
+
+    .suffix {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .error-message {
+      min-height: 18px;
+      color: var(--error);
+      font-size: 0.84rem;
+      font-weight: 650;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 11px 18px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-primary { color: #ffffff; background: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { color: var(--text); background: #ffffff; border-color: var(--border); }
+    .btn-secondary:hover { background: #f8fafc; }
+
+    .results-panel {
+      align-self: start;
+      padding: 24px;
+      background: #fbfdff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .total-card {
+      margin-bottom: 18px;
+      padding: 22px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #0A66C2 0%, #073b70 100%);
+      border-radius: 16px;
+    }
+
+    .total-label { margin: 0 0 8px; font-weight: 700; opacity: 0.9; }
+
+    .total-value {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    .daily-note {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      color: #12335b;
+      background: var(--success-bg);
+      border: 1px solid #c7ddff;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 0;
+      border-bottom: 1px solid #e8edf5;
+    }
+
+    .result-row dt { color: var(--muted); font-weight: 650; }
+    .result-row dd { margin: 0; text-align: right; font-weight: 850; }
+
+    .formula-box {
+      margin-top: 18px;
+      padding: 16px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .formula-box h3 { margin: 0 0 10px; font-size: 1rem; }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      color: #263247;
+      font: 700 0.98rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .invalid-state {
+      color: var(--error);
+      font-weight: 750;
+    }
+
+    @media (max-width: 880px) {
+      .tool-card { grid-template-columns: 1fr; padding: 22px; }
+      .results-panel { position: static; }
+    }
+
+    @media (max-width: 620px) {
+      main { width: min(100% - 20px, 1120px); padding: 24px 0; }
+      .tool-card { padding: 18px; gap: 22px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      button { width: 100%; }
+      .result-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .result-row dd { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">HR • Finance • Talent Acquisition</p>
+      <h1>Calcolatore costo sostituzione dipendente</h1>
+      <p class="intro">Stima in tempo reale l’impatto economico complessivo della sostituzione di una risorsa, includendo fee di selezione, time-to-hire e premio al cambio.</p>
+    </header>
+
+    <section class="tool-card" aria-label="Tool di calcolo costo sostituzione dipendente">
+      <form id="roi-form" novalidate>
+        <fieldset>
+          <legend><span class="section-number">1</span>Dati del dipendente</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="ral">RAL attuale del dipendente</label>
+              <div class="input-wrapper">
+                <input id="ral" name="ral" type="number" min="0" step="100" value="35000" required inputmode="decimal" aria-describedby="ral-error">
+                <span class="suffix">€</span>
+              </div>
+              <span id="ral-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="produttivitaAnnua">Produttività annua</label>
+              <div class="input-wrapper">
+                <input id="produttivitaAnnua" name="produttivitaAnnua" type="number" min="0" step="100" value="33000" inputmode="decimal" aria-describedby="produttivitaAnnua-error">
+                <span class="suffix">€</span>
+              </div>
+              <span id="produttivitaAnnua-error" class="error-message" aria-live="polite"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="section-number">2</span>Costi e tempi di selezione</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="percentualeFee">Fee di selezione</label>
+              <div class="input-wrapper">
+                <input id="percentualeFee" name="percentualeFee" type="number" min="0" max="100" step="0.1" value="15" inputmode="decimal" aria-describedby="percentualeFee-error">
+                <span class="suffix">%</span>
+              </div>
+              <span id="percentualeFee-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="percentualePremio">Premio al cambio</label>
+              <div class="input-wrapper">
+                <input id="percentualePremio" name="percentualePremio" type="number" min="0" max="100" step="0.1" value="20" inputmode="decimal" aria-describedby="percentualePremio-error">
+                <span class="suffix">%</span>
+              </div>
+              <span id="percentualePremio-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="giorniTimeToHire">Time-to-hire</label>
+              <div class="input-wrapper">
+                <input id="giorniTimeToHire" name="giorniTimeToHire" type="number" min="0" step="1" value="45" inputmode="numeric" aria-describedby="giorniTimeToHire-error">
+                <span class="suffix">gg</span>
+              </div>
+              <span id="giorniTimeToHire-error" class="error-message" aria-live="polite"></span>
+            </div>
+
+            <div class="field">
+              <label for="giorniLavorativiAnnui">Giorni lavorativi annui</label>
+              <div class="input-wrapper">
+                <input id="giorniLavorativiAnnui" name="giorniLavorativiAnnui" type="number" min="1" step="1" value="250" inputmode="numeric" aria-describedby="giorniLavorativiAnnui-error">
+                <span class="suffix">gg</span>
+              </div>
+              <span id="giorniLavorativiAnnui-error" class="error-message" aria-live="polite"></span>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button class="btn-secondary" type="button" id="reset-button">Ripristina valori</button>
+        </div>
+      </form>
+
+      <aside class="results-panel" aria-live="polite">
+        <h2 class="results-title"><span class="section-number">3</span>Risultato economico</h2>
+        <div class="total-card">
+          <p class="total-label">Costo totale della sostituzione</p>
+          <p class="total-value" id="costoTotale">€ 0</p>
+        </div>
+
+        <p class="daily-note" id="daily-note">Ogni giorno aggiuntivo con la posizione scoperta costa circa € 0.</p>
+
+        <dl class="result-list">
+          <div class="result-row"><dt>Fee di selezione</dt><dd id="feeSelezione">€ 0</dd></div>
+          <div class="result-row"><dt>Premio al cambio</dt><dd id="premioCambio">€ 0</dd></div>
+          <div class="result-row"><dt>Nuova RAL stimata</dt><dd id="nuovaRalStimata">€ 0</dd></div>
+          <div class="result-row"><dt>Produttività giornaliera</dt><dd id="produttivitaGiornaliera">€ 0</dd></div>
+          <div class="result-row"><dt>Costo del time-to-hire</dt><dd id="costoTimeToHire">€ 0</dd></div>
+        </dl>
+
+        <div class="formula-box">
+          <h3>Riepilogo del calcolo</h3>
+          <pre id="formula-summary">Inserisci valori validi per visualizzare il calcolo.</pre>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const defaults = {
+      ral: 35000,
+      percentualeFee: 15,
+      percentualePremio: 20,
+      produttivitaAnnua: 33000,
+      giorniTimeToHire: 45,
+      giorniLavorativiAnnui: 250
+    };
+
+    const form = document.getElementById('roi-form');
+    const resetButton = document.getElementById('reset-button');
+    const inputIds = Object.keys(defaults);
+    const inputs = Object.fromEntries(inputIds.map((id) => [id, document.getElementById(id)]));
+
+    const resultElements = {
+      feeSelezione: document.getElementById('feeSelezione'),
+      premioCambio: document.getElementById('premioCambio'),
+      nuovaRalStimata: document.getElementById('nuovaRalStimata'),
+      produttivitaGiornaliera: document.getElementById('produttivitaGiornaliera'),
+      costoTimeToHire: document.getElementById('costoTimeToHire'),
+      costoTotale: document.getElementById('costoTotale'),
+      dailyNote: document.getElementById('daily-note'),
+      formulaSummary: document.getElementById('formula-summary')
+    };
+
+    const currencyFormatter = new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0
+    });
+
+    // Formatta valori monetari in formato italiano.
+    function formatCurrency(value) {
+      return Number.isFinite(value) ? currencyFormatter.format(value) : currencyFormatter.format(0);
+    }
+
+    function setFieldError(id, message) {
+      const errorElement = document.getElementById(`${id}-error`);
+      inputs[id].setAttribute('aria-invalid', message ? 'true' : 'false');
+      errorElement.textContent = message;
+    }
+
+    // Legge e valida tutti gli input del form.
+    function readAndValidateInputs() {
+      const values = {};
+      const errors = {};
+
+      inputIds.forEach((id) => {
+        const rawValue = inputs[id].value.trim();
+        const value = Number(rawValue);
+        values[id] = value;
+
+        if (rawValue === '') {
+          errors[id] = id === 'ral' ? 'La RAL è obbligatoria.' : 'Inserisci un valore.';
+          return;
+        }
+
+        if (!Number.isFinite(value)) {
+          errors[id] = 'Inserisci un numero valido.';
+          return;
+        }
+
+        if (value < 0) {
+          errors[id] = 'Il valore non può essere negativo.';
+        }
+      });
+
+      ['percentualeFee', 'percentualePremio'].forEach((id) => {
+        if (!errors[id] && values[id] > 100) {
+          errors[id] = 'La percentuale non può superare il 100%.';
+        }
+      });
+
+      ['giorniTimeToHire', 'giorniLavorativiAnnui'].forEach((id) => {
+        if (!errors[id] && !Number.isInteger(values[id])) {
+          errors[id] = 'Inserisci un numero intero di giorni.';
+        }
+      });
+
+      if (!errors.giorniLavorativiAnnui && values.giorniLavorativiAnnui <= 0) {
+        errors.giorniLavorativiAnnui = 'I giorni lavorativi devono essere maggiori di zero.';
+      }
+
+      inputIds.forEach((id) => setFieldError(id, errors[id] || ''));
+
+      return {
+        values,
+        isValid: Object.keys(errors).length === 0
+      };
+    }
+
+    // Esegue il calcolo economico principale.
+    function calculateCosts(values) {
+      const premioCambio = values.ral * (values.percentualePremio / 100);
+      const feeSelezione = (values.ral + premioCambio) * (values.percentualeFee / 100);
+      const produttivitaGiornaliera = values.produttivitaAnnua / values.giorniLavorativiAnnui;
+      const costoTimeToHire = produttivitaGiornaliera * values.giorniTimeToHire;
+      const costoTotale = feeSelezione + premioCambio + costoTimeToHire;
+      const nuovaRalStimata = values.ral + premioCambio;
+
+      return {
+        feeSelezione,
+        premioCambio,
+        produttivitaGiornaliera,
+        costoTimeToHire,
+        costoTotale,
+        nuovaRalStimata
+      };
+    }
+
+    function clearResults() {
+      resultElements.costoTotale.textContent = formatCurrency(0);
+      resultElements.dailyNote.textContent = 'Correggi i valori evidenziati per aggiornare il costo giornaliero.';
+      resultElements.dailyNote.classList.add('invalid-state');
+      ['feeSelezione', 'premioCambio', 'nuovaRalStimata', 'produttivitaGiornaliera', 'costoTimeToHire'].forEach((id) => {
+        resultElements[id].textContent = formatCurrency(0);
+      });
+      resultElements.formulaSummary.textContent = 'Inserisci valori validi per visualizzare il calcolo.';
+    }
+
+    // Aggiorna l'interfaccia con i risultati calcolati.
+    function updateInterface() {
+      const { values, isValid } = readAndValidateInputs();
+
+      if (!isValid) {
+        clearResults();
+        return;
+      }
+
+      const results = calculateCosts(values);
+      resultElements.dailyNote.classList.remove('invalid-state');
+      resultElements.feeSelezione.textContent = formatCurrency(results.feeSelezione);
+      resultElements.premioCambio.textContent = formatCurrency(results.premioCambio);
+      resultElements.nuovaRalStimata.textContent = formatCurrency(results.nuovaRalStimata);
+      resultElements.produttivitaGiornaliera.textContent = formatCurrency(results.produttivitaGiornaliera);
+      resultElements.costoTimeToHire.textContent = formatCurrency(results.costoTimeToHire);
+      resultElements.costoTotale.textContent = formatCurrency(results.costoTotale);
+      resultElements.dailyNote.textContent = `Ogni giorno aggiuntivo con la posizione scoperta costa circa ${formatCurrency(results.produttivitaGiornaliera)}.`;
+      resultElements.formulaSummary.textContent = `${formatCurrency(results.feeSelezione)} di fee\n+ ${formatCurrency(results.costoTimeToHire)} di costo del time-to-hire\n+ ${formatCurrency(results.premioCambio)} di premio al cambio\n= ${formatCurrency(results.costoTotale)} di costo totale`;
+    }
+
+    // Ripristina i valori predefiniti del tool.
+    function resetValues() {
+      inputIds.forEach((id) => {
+        inputs[id].value = defaults[id];
+      });
+      updateInterface();
+    }
+
+    form.addEventListener('input', updateInterface);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      updateInterface();
+    });
+    resetButton.addEventListener('click', resetValues);
+
+    updateInterface();
+  </script>
+</body>
+</html>
